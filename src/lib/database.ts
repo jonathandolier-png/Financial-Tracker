@@ -1,21 +1,4 @@
-import { supabase, USER_ID, getFinancialYear } from './supabase';
-
-export interface CountryVisit {
-  id?: string;
-  user_id: string;
-  country_code: string;
-  country_name: string;
-  date: string; // YYYY-MM-DD
-  financial_year: number;
-}
-
-export interface CountryLimit {
-  id?: string;
-  user_id: string;
-  country_code: string;
-  day_limit: number;
-  alert_days_before: number;
-}
+import { getSupabase, USER_ID, getFinancialYear } from './supabase';
 
 export interface CountrySummary {
   country_code: string;
@@ -30,10 +13,11 @@ export async function logCountryVisit(
   countryName: string,
   date: Date = new Date()
 ): Promise<void> {
+  const db = getSupabase();
   const dateStr = date.toISOString().split('T')[0];
   const fy = getFinancialYear(date);
 
-  const { error } = await supabase
+  const { error } = await db
     .from('country_visits')
     .upsert(
       {
@@ -50,16 +34,17 @@ export async function logCountryVisit(
 }
 
 export async function getCountrySummaries(financialYear?: number): Promise<CountrySummary[]> {
+  const db = getSupabase();
   const fy = financialYear ?? getFinancialYear();
 
   const [{ data: visits, error: visitsError }, { data: limits, error: limitsError }] =
     await Promise.all([
-      supabase
+      db
         .from('country_visits')
         .select('country_code, country_name')
         .eq('user_id', USER_ID)
         .eq('financial_year', fy),
-      supabase
+      db
         .from('country_limits')
         .select('country_code, day_limit, alert_days_before')
         .eq('user_id', USER_ID),
@@ -100,7 +85,8 @@ export async function setCountryLimit(
   dayLimit: number,
   alertDaysBefore: number = 10
 ): Promise<void> {
-  const { error } = await supabase
+  const db = getSupabase();
+  const { error } = await db
     .from('country_limits')
     .upsert(
       {
@@ -116,7 +102,8 @@ export async function setCountryLimit(
 }
 
 export async function deleteCountryLimit(countryCode: string): Promise<void> {
-  const { error } = await supabase
+  const db = getSupabase();
+  const { error } = await db
     .from('country_limits')
     .delete()
     .eq('user_id', USER_ID)
@@ -126,7 +113,8 @@ export async function deleteCountryLimit(countryCode: string): Promise<void> {
 }
 
 export async function getAvailableFinancialYears(): Promise<number[]> {
-  const { data, error } = await supabase
+  const db = getSupabase();
+  const { data, error } = await db
     .from('country_visits')
     .select('financial_year')
     .eq('user_id', USER_ID);
