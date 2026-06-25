@@ -16,7 +16,7 @@ import { colors } from '../theme/colors';
 import { saveSupabaseCredentials } from '../lib/supabase';
 
 interface Props {
-  onComplete: () => void;
+  onComplete: () => Promise<void>;
 }
 
 export function SetupScreen({ onComplete }: Props) {
@@ -40,7 +40,7 @@ export function SetupScreen({ onComplete }: Props) {
     setSaving(true);
     try {
       await saveSupabaseCredentials(cleanUrl, cleanKey);
-      onComplete();
+      await onComplete();
     } catch (e) {
       Alert.alert('Error', 'Could not save credentials. Please try again.');
     } finally {

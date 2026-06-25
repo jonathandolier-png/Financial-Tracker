@@ -23,13 +23,19 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      const hasCreds = await hasCredentials();
-      if (hasCreds) {
-        await initSupabase();
-        const ok = await requestPermissions();
-        if (ok) await startBackgroundTracking();
-        setNeedsSetup(false);
-      } else {
+      try {
+        const hasCreds = await hasCredentials();
+        if (hasCreds) {
+          await initSupabase();
+          try {
+            const ok = await requestPermissions();
+            if (ok) await startBackgroundTracking();
+          } catch (_) {}
+          setNeedsSetup(false);
+        } else {
+          setNeedsSetup(true);
+        }
+      } catch (_) {
         setNeedsSetup(true);
       }
       setReady(true);
@@ -48,8 +54,10 @@ export default function App() {
     return (
       <SetupScreen
         onComplete={async () => {
-          const ok = await requestPermissions();
-          if (ok) await startBackgroundTracking();
+          try {
+            const ok = await requestPermissions();
+            if (ok) await startBackgroundTracking();
+          } catch (_) {}
           setNeedsSetup(false);
         }}
       />
