@@ -3,7 +3,6 @@ import * as Notifications from 'expo-notifications';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { SetupScreen } from './src/screens/SetupScreen';
 import { hasCredentials, initSupabase } from './src/lib/supabase';
-import { startBackgroundTracking, requestPermissions } from './src/lib/locationService';
 import { View, ActivityIndicator } from 'react-native';
 import { colors } from './src/theme/colors';
 
@@ -22,7 +21,6 @@ export default function App() {
   const [needsSetup, setNeedsSetup] = useState(false);
 
   useEffect(() => {
-    // Safety net: never stay on loading screen longer than 4 seconds
     const giveUp = setTimeout(() => {
       setNeedsSetup(true);
       setReady(true);
@@ -43,10 +41,7 @@ export default function App() {
         setNeedsSetup(true);
       }
       setReady(true);
-      // Request permissions after app is visible — never blocks startup
-      requestPermissions()
-        .then((ok) => { if (ok) startBackgroundTracking().catch(() => {}); })
-        .catch(() => {});
+      Notifications.requestPermissionsAsync().catch(() => {});
     })();
 
     return () => clearTimeout(giveUp);
@@ -64,10 +59,6 @@ export default function App() {
     return (
       <SetupScreen
         onComplete={async () => {
-          try {
-            const ok = await requestPermissions();
-            if (ok) await startBackgroundTracking();
-          } catch (_) {}
           setNeedsSetup(false);
         }}
       />

@@ -16,35 +16,18 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.countrytracker.app",
-      "infoPlist": {
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app tracks which country you are in to count your days spent there.",
-        "NSLocationAlwaysUsageDescription": "This app needs background location access to automatically track which country you are in.",
-        "NSLocationWhenInUseUsageDescription": "This app uses your location to detect which country you are in.",
-        "UIBackgroundModes": ["location", "fetch"]
-      }
+      "bundleIdentifier": "com.countrytracker.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0A0A1A"
-      },
-      "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION"
-      ]
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "Allow Country Days Tracker to use your location to track which country you are in.",
-          "isAndroidBackgroundLocationEnabled": true
-        }
-      ],
       [
         "expo-notifications",
         {
