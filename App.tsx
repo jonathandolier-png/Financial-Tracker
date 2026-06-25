@@ -22,23 +22,34 @@ export default function App() {
   const [needsSetup, setNeedsSetup] = useState(false);
 
   useEffect(() => {
+    // Safety net: never stay on loading screen longer than 4 seconds
+    const giveUp = setTimeout(() => {
+      setNeedsSetup(true);
+      setReady(true);
+    }, 4000);
+
     (async () => {
       try {
         const hasCreds = await hasCredentials();
+        clearTimeout(giveUp);
         if (hasCreds) {
-          await initSupabase().catch(() => {});
+          initSupabase().catch(() => {});
           setNeedsSetup(false);
-          setReady(true);
-          // Request permissions after showing the app — don't block startup
-          requestPermissions()
-            .then((ok) => { if (ok) startBackgroundTracking().catch(() => {}); })
-            .catch(() => {});
-          return;
+        } else {
+          setNeedsSetup(true);
         }
-      } catch (_) {}
-      setNeedsSetup(true);
+      } catch (_) {
+        clearTimeout(giveUp);
+        setNeedsSetup(true);
+      }
       setReady(true);
+      // Request permissions after app is visible — never blocks startup
+      requestPermissions()
+        .then((ok) => { if (ok) startBackgroundTracking().catch(() => {}); })
+        .catch(() => {});
     })();
+
+    return () => clearTimeout(giveUp);
   }, []);
 
   if (!ready) {
