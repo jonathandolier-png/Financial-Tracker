@@ -33,7 +33,11 @@ export function getSupabase(): SupabaseClient {
 export async function saveSupabaseCredentials(url: string, key: string): Promise<void> {
   await AsyncStorage.setItem(SUPABASE_URL_KEY, url.trim());
   await AsyncStorage.setItem(SUPABASE_KEY_KEY, key.trim());
-  _supabase = makeClient(url.trim(), key.trim());
+  try {
+    _supabase = makeClient(url.trim(), key.trim());
+  } catch (_) {
+    // credentials saved; client initialised on next app launch
+  }
 }
 
 export async function hasCredentials(): Promise<boolean> {

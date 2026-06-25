@@ -42,7 +42,8 @@ export function SetupScreen({ onComplete }: Props) {
       await saveSupabaseCredentials(cleanUrl, cleanKey);
       await onComplete();
     } catch (e) {
-      Alert.alert('Error', 'Could not save credentials. Please try again.');
+      const msg = e instanceof Error ? e.message : String(e);
+      Alert.alert('Error', `Could not save credentials.\n\n${msg}`);
     } finally {
       setSaving(false);
     }
