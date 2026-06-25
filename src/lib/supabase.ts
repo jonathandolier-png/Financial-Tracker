@@ -1,22 +1,55 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
+export const SUPABASE_URL_KEY = 'supabase_url';
+export const SUPABASE_KEY_KEY = 'supabase_anon_key';
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+let _supabase: SupabaseClient | null = null;
+
+export async function initSupabase(): Promise<SupabaseClient | null> {
+  const url = await SecureStore.getItemAsync(SUPABASE_URL_KEY);
+  const key = await SecureStore.getItemAsync(SUPABASE_KEY_KEY);
+  if (!url || !key) return null;
+  _supabase = createClient(url, key, {
+    auth: {
+      storage: AsyncStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
+  });
+  return _supabase;
+}
+
+export function getSupabase(): SupabaseClient {
+  if (!_supabase) throw new Error('Supabase not initialised');
+  return _supabase;
+}
+
+export async function saveSupabaseCredentials(url: string, key: string): Promise<void> {
+  await SecureStore.setItemAsync(SUPABASE_URL_KEY, url.trim());
+  await SecureStore.setItemAsync(SUPABASE_KEY_KEY, key.trim());
+  _supabase = createClient(url.trim(), key.trim(), {
+    auth: {
+      storage: AsyncStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
+  });
+}
+
+export async function hasCredentials(): Promise<boolean> {
+  const url = await SecureStore.getItemAsync(SUPABASE_URL_KEY);
+  const key = await SecureStore.getItemAsync(SUPABASE_KEY_KEY);
+  return !!(url && key);
+}
 
 export const USER_ID = 'default';
 
 export function getFinancialYear(date: Date = new Date()): number {
-  const month = date.getMonth() + 1; // 1-12
+  const month = date.getMonth() + 1;
   const year = date.getFullYear();
   return month >= 4 ? year : year - 1;
 }
@@ -27,7 +60,7 @@ export function getFinancialYearLabel(fy: number): string {
 
 export function getFinancialYearRange(fy: number): { start: Date; end: Date } {
   return {
-    start: new Date(fy, 3, 1),   // April 1
-    end: new Date(fy + 1, 2, 31), // March 31 next year
+    start: new Date(fy, 3, 1),
+    end: new Date(fy + 1, 2, 31),
   };
 }
