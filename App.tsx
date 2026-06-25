@@ -26,18 +26,17 @@ export default function App() {
       try {
         const hasCreds = await hasCredentials();
         if (hasCreds) {
-          await initSupabase();
-          try {
-            const ok = await requestPermissions();
-            if (ok) await startBackgroundTracking();
-          } catch (_) {}
+          await initSupabase().catch(() => {});
           setNeedsSetup(false);
-        } else {
-          setNeedsSetup(true);
+          setReady(true);
+          // Request permissions after showing the app — don't block startup
+          requestPermissions()
+            .then((ok) => { if (ok) startBackgroundTracking().catch(() => {}); })
+            .catch(() => {});
+          return;
         }
-      } catch (_) {
-        setNeedsSetup(true);
-      }
+      } catch (_) {}
+      setNeedsSetup(true);
       setReady(true);
     })();
   }, []);
