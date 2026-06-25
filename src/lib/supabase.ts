@@ -1,24 +1,27 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
 
 export const SUPABASE_URL_KEY = 'supabase_url';
 export const SUPABASE_KEY_KEY = 'supabase_anon_key';
 
 let _supabase: SupabaseClient | null = null;
 
-export async function initSupabase(): Promise<SupabaseClient | null> {
-  const url = await SecureStore.getItemAsync(SUPABASE_URL_KEY);
-  const key = await SecureStore.getItemAsync(SUPABASE_KEY_KEY);
-  if (!url || !key) return null;
-  _supabase = createClient(url, key, {
+function makeClient(url: string, key: string): SupabaseClient {
+  return createClient(url, key, {
     auth: {
       storage: AsyncStorage,
-      autoRefreshToken: true,
-      persistSession: true,
+      autoRefreshToken: false,
+      persistSession: false,
       detectSessionInUrl: false,
     },
   });
+}
+
+export async function initSupabase(): Promise<SupabaseClient | null> {
+  const url = await AsyncStorage.getItem(SUPABASE_URL_KEY);
+  const key = await AsyncStorage.getItem(SUPABASE_KEY_KEY);
+  if (!url || !key) return null;
+  _supabase = makeClient(url, key);
   return _supabase;
 }
 
@@ -28,21 +31,14 @@ export function getSupabase(): SupabaseClient {
 }
 
 export async function saveSupabaseCredentials(url: string, key: string): Promise<void> {
-  await SecureStore.setItemAsync(SUPABASE_URL_KEY, url.trim());
-  await SecureStore.setItemAsync(SUPABASE_KEY_KEY, key.trim());
-  _supabase = createClient(url.trim(), key.trim(), {
-    auth: {
-      storage: AsyncStorage,
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: false,
-    },
-  });
+  await AsyncStorage.setItem(SUPABASE_URL_KEY, url.trim());
+  await AsyncStorage.setItem(SUPABASE_KEY_KEY, key.trim());
+  _supabase = makeClient(url.trim(), key.trim());
 }
 
 export async function hasCredentials(): Promise<boolean> {
-  const url = await SecureStore.getItemAsync(SUPABASE_URL_KEY);
-  const key = await SecureStore.getItemAsync(SUPABASE_KEY_KEY);
+  const url = await AsyncStorage.getItem(SUPABASE_URL_KEY);
+  const key = await AsyncStorage.getItem(SUPABASE_KEY_KEY);
   return !!(url && key);
 }
 
