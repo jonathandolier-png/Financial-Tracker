@@ -1,7 +1,7 @@
 {
   "name": "country-tracker",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "expo/AppEntry",
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
     "@react-native-async-storage/async-storage": "^3.1.1",
@@ -16,6 +16,7 @@
     "expo-secure-store": "^56.0.4",
     "expo-status-bar": "~56.0.4",
     "expo-task-manager": "^56.0.19",
+    "expo-updates": "~0.27.4",
     "react": "19.2.3",
     "react-native": "0.85.3",
     "react-native-country-flag": "^2.0.2",

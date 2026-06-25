@@ -6,6 +6,13 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
+    "owner": "jonathan9726",
+    "updates": {
+      "url": "https://u.expo.dev/6e4e1500-6ca7-4bf9-b6b5-a98a22abdad6"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.countrytracker.app",
@@ -44,6 +51,11 @@
           "color": "#7C3AED"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "6e4e1500-6ca7-4bf9-b6b5-a98a22abdad6"
+      }
+    }
   }
 }
